@@ -1,36 +1,58 @@
+import tkinter
 import customtkinter
 
 
-def open_main_window():
+def open_dashboard():
     customtkinter.set_appearance_mode( "dark" )
     customtkinter.set_default_color_theme( "dark-blue" )
 
     root = customtkinter.CTk()
-    window_width = 500
-    window_height = 350
 
-    # Get the screen dimension
-    screen_width = root.winfo_screenwidth()
-    screen_height = root.winfo_screenheight()
+    # Set the window to full screen
+    root.attributes( '-fullscreen', True )
 
-    # Find the center point
-    center_x = int( screen_width / 2 - window_width / 2 )
-    center_y = int( screen_height / 2 - window_height / 2 )
+    def change_frame(new_frame):
+        new_frame.tkraise()
 
-    # Set the position of the window to the center of the screen
-    root.geometry( f'{window_width}x{window_height}+{center_x}+{center_y}' )
+    def exit_fullscreen(event=None):
+        root.attributes( '-fullscreen', False )
 
-    frame = customtkinter.CTkFrame( master=root )
-    frame.pack( pady=20, padx=60, fill="both", expand=True )
+    root.bind( "<Escape>", exit_fullscreen )  # Bind the Escape key to exit full-screen
 
-    label = customtkinter.CTkLabel( master=frame, text="Main Application", font=("Roboto", 24) )
-    label.pack( pady=12, padx=10 )
+    # Main frame
+    main_frame = customtkinter.CTkFrame( master=root )
+    main_frame.pack( fill="both", expand=True )
 
-    button = customtkinter.CTkButton( master=frame, text="Button", command=lambda: print( "Button Clicked" ) )
-    button.pack( pady=12, padx=10 )
+    # Sidebar
+    sidebar_frame = customtkinter.CTkFrame( master=main_frame, width=200 )
+    sidebar_frame.pack( side="left", fill="y" )
+
+    # Main content area
+    content_frame = customtkinter.CTkFrame( master=main_frame )
+    content_frame.pack( side="right", fill="both", expand=True )
+
+    frame1 = customtkinter.CTkFrame( master=content_frame )
+    frame2 = customtkinter.CTkFrame( master=content_frame )
+
+    for frame in (frame1, frame2):
+        frame.place( x=0, y=0, relwidth=1, relheight=1 )
+
+    label1 = customtkinter.CTkLabel( master=frame1, text="Dashboard Home", font=("Roboto", 24) )
+    label1.pack( pady=20, padx=20 )
+
+    label2 = customtkinter.CTkLabel( master=frame2, text="Settings", font=("Roboto", 24) )
+    label2.pack( pady=20, padx=20 )
+
+    button1 = customtkinter.CTkButton( master=sidebar_frame, text="Home", command=lambda: change_frame( frame1 ) )
+    button1.pack( pady=10, padx=10 )
+
+    button2 = customtkinter.CTkButton( master=sidebar_frame, text="Settings", command=lambda: change_frame( frame2 ) )
+    button2.pack( pady=10, padx=10 )
+
+    change_frame( frame1 )  # Show the home frame by default
 
     root.mainloop()
 
 
 if __name__ == "__main__":
-    open_main_window()
+    open_dashboard()
