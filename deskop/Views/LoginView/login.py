@@ -29,7 +29,7 @@ root.geometry(f'{window_width}x{window_height}+{center_x}+{center_y}')
 
 def login():
     root.destroy()  # Close the login window
-    main.open_dashboard()  # Call the function from main.py to open the main window
+    main.open_dashboard()  # Call the function from orders.py to open the main window
 
 
 frame = customtkinter.CTkFrame(master=root)

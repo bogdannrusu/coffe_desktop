@@ -1,4 +1,5 @@
 import customtkinter
+from PIL import Image, ImageTk
 
 
 def open_dashboard():
@@ -43,35 +44,56 @@ def open_dashboard():
     sidebar_frame = customtkinter.CTkFrame(master=main_frame, width=200)
     sidebar_frame.pack(side="left", fill="y")
 
+    # Load and add logo
+    logo_image = Image.open("images/logo.png")
+    logo_image_resized = logo_image.resize((100, 50), Image.Resampling.LANCZOS)  # Resize if necessary
+    logo_image_tk = ImageTk.PhotoImage(logo_image_resized)
+    logo_label = customtkinter.CTkLabel(master=sidebar_frame, image=logo_image_tk)
+    logo_label.image = logo_image_tk  # Keep a reference to avoid garbage collection
+    logo_label.pack(pady=20)
+
     # Main content area
     content_frame = customtkinter.CTkFrame(master=main_frame)
     content_frame.pack(side="right", fill="both", expand=True)
 
-    frameHome = customtkinter.CTkFrame(master=content_frame)
-    frameSettings = customtkinter.CTkFrame(master=content_frame)
+    # Frames
+    frame_home = customtkinter.CTkFrame(master=content_frame)
+    frame_settings = customtkinter.CTkFrame(master=content_frame)
+    frame_orders = customtkinter.CTkFrame(master=content_frame)
 
-    for frame in (frameHome, frameSettings):
+    for frame in (frame_home, frame_settings, frame_orders):
         frame.place(x=0, y=0, relwidth=1, relheight=1)
 
-    labelhello = customtkinter.CTkLabel(master=frameHome, text="Dashboard Home", font=("Roboto", 24))
+    labelhello = customtkinter.CTkLabel(master=frame_home, text="Dashboard Home", font=("Roboto", 24))
     labelhello.pack(pady=20, padx=20)
 
-    label2 = customtkinter.CTkLabel(master=frameSettings, text="hey", font=("Roboto", 24))
-    label2.pack(pady=20, padx=20)
+    label_settings = customtkinter.CTkLabel(master=frame_settings, text="Settings", font=("Roboto", 24))
+    label_settings.pack(pady=20, padx=20)
 
-    home = customtkinter.CTkButton(master=sidebar_frame, text="Home", command=lambda: change_frame(frameHome))
+    label_orders = customtkinter.CTkLabel(master=frame_orders, text="Orders", font=("Roboto", 24))
+    label_orders.pack(pady=20, padx=20)
+
+    # Load icons
+    home_icon = customtkinter.CTkImage(Image.open("images/home.png"))
+    settings_icon = customtkinter.CTkImage(Image.open("images/settings.png"))
+    orders_icon = customtkinter.CTkImage(Image.open("images/shopping-bag.png"))
+
+    home = customtkinter.CTkButton(master=sidebar_frame, text="Acasa", image=home_icon, compound="left",
+                                   command=lambda: change_frame(frame_home))
     home.pack(pady=10, padx=10)
 
-    settings = customtkinter.CTkButton(master=sidebar_frame, text="Settings", command=lambda: change_frame(frameSettings))
+    settings = customtkinter.CTkButton(master=sidebar_frame, text="Setari", image=settings_icon, compound="left",
+                                       command=lambda: change_frame(frame_settings))
     settings.pack(pady=10, padx=10)
 
-    orders = customtkinter.CTkButton(master=sidebar_frame, text="Orders", command=lambda: change_frame(frameSettings))
+    orders = customtkinter.CTkButton(master=sidebar_frame, text="Comenzi", image=orders_icon, compound="left",
+                                     command=lambda: change_frame(frame_orders))
     orders.pack(pady=10, padx=10)
 
     # close_button = customtkinter.CTkButton(master=main_frame, text="X", command=close_application, fg_color="red", hover_color="dark red")
     # close_button.place(relx=1.0, rely=0.0, anchor="ne")
 
-    change_frame(frameHome)
+    change_frame(frame_home)
 
     root.mainloop()
 
