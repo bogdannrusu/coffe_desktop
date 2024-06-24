@@ -2,8 +2,18 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import mysql.connector
 import hashlib
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+
+# Removing CORS issues
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Adjust this as necessary for your environment
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 # Database connection
@@ -42,8 +52,7 @@ def register(user: User):
     except mysql.connector.IntegrityError as e:
         raise HTTPException( status_code=400, detail=f"Username already exists: {str( e )}" )
     except Exception as e:
-        raise {"message": "User or Password are not correct"}
-       # raise HTTPException( status_code=500, detail=f"Server error: {str( e )}" )
+        raise HTTPException( status_code=500, detail=f"Server error: {str( e )}" )
     finally:
         connection.close()
     return {"message": "User registered successfully"}
