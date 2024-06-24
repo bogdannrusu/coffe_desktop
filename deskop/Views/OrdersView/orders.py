@@ -1,38 +1,5 @@
-import mysql.connector
-from mysql.connector import Error
-import tkinter as tk
-from tkinter import ttk
 import customtkinter
-
-
-def fetch_data():
-    try:
-        conn = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="Ban4ever!#",
-            database="coffee_lecoupage"
-        )
-
-        if conn.is_connected():
-            cursor = conn.cursor()
-            # Execute a query
-            cursor.execute( "SELECT * FROM users" )
-
-            # Fetch all rows
-            rows = cursor.fetchall()
-
-            # Close the connection
-            conn.close()
-
-            return rows
-        else:
-            print( "Failed to connect to the database" )
-            return []
-
-    except Error as e:
-        print( f"Error: {e}" )
-        return []
+from PIL import Image, ImageTk
 
 
 def open_dashboard():
@@ -40,6 +7,20 @@ def open_dashboard():
     customtkinter.set_default_color_theme( "dark-blue" )
 
     root = customtkinter.CTk()
+    root.title( "Le Coupage" )
+    window_width = 1280
+    window_height = 920
+
+    # Get the screen dimension
+    screen_width = root.winfo_screenwidth()
+    screen_height = root.winfo_screenheight()
+
+    # Find the center point
+    center_x = int( screen_width / 2 - window_width / 2 )
+    center_y = int( screen_height / 2 - window_height / 2 )
+
+    # Set the position of the window to the center of the screen
+    root.geometry( f'{window_width}x{window_height}+{center_x}+{center_y}' )
 
     # Set the window to full screen
     root.attributes( '-fullscreen', True )
@@ -63,68 +44,55 @@ def open_dashboard():
     sidebar_frame = customtkinter.CTkFrame( master=main_frame, width=200 )
     sidebar_frame.pack( side="left", fill="y" )
 
+    # Load and add logo
+    logo_image = Image.open( "images/logo.png" )
+    logo_image_resized = logo_image.resize( (100, 100), Image.Resampling.LANCZOS )  # Resize if necessary
+    logo_image_tk = ImageTk.PhotoImage( logo_image_resized )
+    logo_label = customtkinter.CTkLabel( master=sidebar_frame, image=logo_image_tk )
+    logo_label.image = logo_image_tk  # Keep a reference to avoid garbage collection
+    logo_label.pack( pady=20 )
+
     # Main content area
     content_frame = customtkinter.CTkFrame( master=main_frame )
     content_frame.pack( side="right", fill="both", expand=True )
 
-    frame1 = customtkinter.CTkFrame( master=content_frame )
-    frame2 = customtkinter.CTkFrame( master=content_frame )
+    # Frames
+    frame_home = customtkinter.CTkFrame( master=content_frame )
+    frame_settings = customtkinter.CTkFrame( master=content_frame )
+    frame_orders = customtkinter.CTkFrame( master=content_frame )
 
-    for frame in (frame1, frame2):
+    for frame in (frame_home, frame_settings, frame_orders):
         frame.place( x=0, y=0, relwidth=1, relheight=1 )
 
-    label1 = customtkinter.CTkLabel( master=frame1, text="Dashboard Home", font=("Roboto", 24) )
-    label1.pack( pady=20, padx=20 )
+    labelhello = customtkinter.CTkLabel( master=frame_home, text="Dashboard Home", font=("Roboto", 24) )
+    labelhello.pack( pady=20, padx=20 )
 
-    label2 = customtkinter.CTkLabel( master=frame2, text="Settings", font=("Roboto", 24) )
-    label2.pack( pady=20, padx=20 )
+    label_settings = customtkinter.CTkLabel( master=frame_settings, text="Settings", font=("Roboto", 24) )
+    label_settings.pack( pady=20, padx=20 )
 
-    button1 = customtkinter.CTkButton( master=sidebar_frame, text="Home", command=lambda: change_frame( frame1 ) )
-    button1.pack( pady=10, padx=10 )
+    label_orders = customtkinter.CTkLabel( master=frame_orders, text="Orders", font=("Roboto", 24) )
+    label_orders.pack( pady=20, padx=20 )
 
-    button2 = customtkinter.CTkButton( master=sidebar_frame, text="Settings", command=lambda: change_frame( frame2 ) )
-    button2.pack( pady=10, padx=10 )
+    # Load icons
+    home_icon = customtkinter.CTkImage( Image.open( "images/home.png" ) )
+    settings_icon = customtkinter.CTkImage( Image.open( "images/settings.png" ) )
+    orders_icon = customtkinter.CTkImage( Image.open( "images/shopping-bag.png" ) )
 
-    # Add the red button at the top-right corner
-    close_button = customtkinter.CTkButton( master=main_frame, text="X", command=close_application, fg_color="red",
-                                            hover_color="dark red" )
-    close_button.place( relx=1.0, rely=0.0, anchor="ne" )
+    home = customtkinter.CTkButton( master=sidebar_frame, text="Home", image=home_icon, compound="left",
+                                    command=lambda: change_frame( frame_home ) )
+    home.pack( pady=10, padx=10 )
 
-    # Create a new frame for the data grid
-    data_frame = customtkinter.CTkFrame( master=content_frame )
-    data_frame.place( x=0, y=0, relwidth=1, relheight=1 )
+    settings = customtkinter.CTkButton( master=sidebar_frame, text="Settings", image=settings_icon, compound="left",
+                                        command=lambda: change_frame( frame_settings ) )
+    settings.pack( pady=10, padx=10 )
 
-    # Fetch data from the database
-    data = fetch_data()
+    orders = customtkinter.CTkButton( master=sidebar_frame, text="Orders", image=orders_icon, compound="left",
+                                      command=lambda: change_frame( frame_orders ) )
+    orders.pack( pady=10, padx=10 )
 
-    # Create the treeview
-    columns = ("OrderID", "CustomerName", "OrderDate")  # Adjust these columns according to your table
-    tree = ttk.Treeview( data_frame, columns=columns, show='headings' )
+    # close_button = customtkinter.CTkButton(master=main_frame, text="X", command=close_application, fg_color="red", hover_color="dark red")
+    # close_button.place(relx=1.0, rely=0.0, anchor="ne")
 
-    # Define headings
-    for col in columns:
-        tree.heading( col, text=col )
-        tree.column( col, width=100 )
-
-    # Insert data into the treeview
-    for row in data:
-        tree.insert( "", tk.END, values=row )
-
-    # Add a scrollbar
-    scrollbar = ttk.Scrollbar( data_frame, orient=tk.VERTICAL, command=tree.yview )
-    tree.configure( yscroll=scrollbar.set )
-    scrollbar.pack( side=tk.RIGHT, fill=tk.Y )
-
-    tree.pack( fill="both", expand=True )
-
-    # Add a button in the sidebar to show the data grid
-    button3 = customtkinter.CTkButton( master=sidebar_frame, text="Orders", command=lambda: change_frame( data_frame ) )
-    button3.pack( pady=10, padx=10 )
-
-    change_frame( frame1 )
+    change_frame( frame_home )
 
     root.mainloop()
-
-
-if __name__ == "__main__":
-    open_dashboard()

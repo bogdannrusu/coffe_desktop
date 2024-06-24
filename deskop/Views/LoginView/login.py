@@ -1,50 +1,137 @@
-import tkinter
-import customtkinter
+# desktop/LoginView/login_script.py
+
+from customtkinter import *
+from tkinter import messagebox
+import requests
 import sys
 import os
 
-# Add the parent directory to the sys.path to import main
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-import main
+# Dynamically add the parent directory to the system path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+import main  # Import the main module
 
-customtkinter.set_appearance_mode("dark")
-customtkinter.set_default_color_theme("dark-blue")
+BASE_URL = "http://127.0.0.1:8000"
 
-root = customtkinter.CTk()
-root.title("Le Coupage")
-window_width = 500
-window_height = 350
+class LoginApp(CTk):
+    def __init__(self):
+        super().__init__()
 
-# Get the screen dimension
-screen_width = root.winfo_screenwidth()
-screen_height = root.winfo_screenheight()
+        self.title("Coffee LeCoupage")
+        self.geometry("500x400")
 
-# Find the center point
-center_x = int(screen_width / 2 - window_width / 2)
-center_y = int(screen_height / 2 - window_height / 2)
+        set_appearance_mode("dark")
+        set_default_color_theme("dark-blue")
 
-# Set the position of the window to the center of the screen
-root.geometry(f'{window_width}x{window_height}+{center_x}+{center_y}')
+        self.current_frame = None
+        self.switch_frame(LoginFrame)
 
-
-def login():
-    root.destroy()  # Close the login window
-    main.open_dashboard()  # Call the function from orders.py to open the main window
+    def switch_frame(self, frame_class):
+        new_frame = frame_class(self)
+        if self.current_frame is not None:
+            self.current_frame.destroy()
+        self.current_frame = new_frame
+        self.current_frame.pack(pady=20, padx=60, fill="both", expand=True)
 
 
-frame = customtkinter.CTkFrame(master=root)
-frame.pack(pady=20, padx=60, fill="both", expand=True)
+class LoginFrame(CTkFrame):
+    def __init__(self, master):
+        super().__init__(master)
 
-labelWelcome = customtkinter.CTkLabel(master=frame, text="Bine ati venit la Coupage", font=("Roboto", 24))
-labelWelcome.pack(pady=12, padx=10)
+        title_label = CTkLabel(master=self, text="Login", font=("Roboto", 24))
+        title_label.pack(pady=12, padx=10)
 
-username = customtkinter.CTkEntry(master=frame, placeholder_text="Username")
-username.pack(pady=12, padx=10)
+        self.entry_username = CTkEntry(master=self, placeholder_text="Username")
+        self.entry_username.pack(pady=12, padx=10)
 
-password = customtkinter.CTkEntry(master=frame, placeholder_text="Parola", show="*")
-password.pack(pady=12, padx=10)
+        self.entry_password = CTkEntry(master=self, placeholder_text="Password", show="*")
+        self.entry_password.pack(pady=12, padx=10)
 
-button = customtkinter.CTkButton(master=frame, text="Login", command=login)
-button.pack(pady=12, padx=10)
+        login_button = CTkButton(master=self, text="Login", command=self.login_user)
+        login_button.pack(pady=12, padx=10)
 
-root.mainloop()
+        switch_button = CTkButton(master=self, text="Register", command=lambda: master.switch_frame(RegisterFrame))
+        switch_button.pack(pady=12, padx=10)
+
+    def login_user(self):
+        username = self.entry_username.get()
+        password = self.entry_password.get()
+
+        data = {
+            "username": username,
+            "password": password
+        }
+        try:
+            response = requests.post(f"{BASE_URL}/login/", json=data)
+            response.raise_for_status()
+            response_json = response.json()
+            if response.status_code == 200:
+                messagebox.showinfo("Success", "Login successful")
+                self.master.destroy()  # Close the login window
+                main.start_main_application()  # Start the main application
+            else:
+                messagebox.showerror("Error", response_json.get("detail"))
+        except requests.exceptions.HTTPError as http_err:
+            print(f"HTTP error occurred: {http_err}")
+            messagebox.showerror("Error", f"HTTP error occurred: {http_err}")
+        except Exception as err:
+            print(f"Other error occurred: {err}")
+            messagebox.showerror("Error", f"An error occurred: {err}")
+
+
+class RegisterFrame(CTkFrame):
+    def __init__(self, master):
+        super().__init__(master)
+
+        title_label = CTkLabel(master=self, text="Register", font=("Roboto", 24))
+        title_label.pack(pady=12, padx=10)
+
+        self.entry_username = CTkEntry(master=self, placeholder_text="Username")
+        self.entry_username.pack(pady=12, padx=10)
+
+        self.entry_password = CTkEntry(master=self, placeholder_text="Password", show="*")
+        self.entry_password.pack(pady=12, padx=10)
+
+        self.entry_confirm_password = CTkEntry(master=self, placeholder_text="Confirm Password", show="*")
+        self.entry_confirm_password.pack(pady=12, padx=10)
+
+        self.is_active_var = IntVar(value=1)  # 1 for True, 0 for False
+        self.check_is_active = CTkCheckBox(master=self, text="Is Active", variable=self.is_active_var)
+        self.check_is_active.pack(pady=12, padx=10)
+
+        register_button = CTkButton(master=self, text="Register", command=self.register_user)
+        register_button.pack(pady=12, padx=10)
+
+        switch_button = CTkButton(master=self, text="Login", command=lambda: master.switch_frame(LoginFrame))
+        switch_button.pack(pady=12, padx=10)
+
+    def register_user(self):
+        username = self.entry_username.get()
+        password = self.entry_password.get()
+        confirm_password = self.entry_confirm_password.get()
+        is_active = bool(self.is_active_var.get())
+
+        if password != confirm_password:
+            messagebox.showerror("Error", "Passwords do not match")
+            return
+
+        data = {
+            "username": username,
+            "password": password,
+            "is_active": is_active
+        }
+        try:
+            response = requests.post( f"{BASE_URL}/login/", json=data )
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.HTTPError as http_err:
+            print( f"HTTP error occurred: {http_err}" )
+            messagebox.showerror( "Error", f"HTTP error occurred: {http_err}" )
+        except Exception as err:
+            print( f"Other error occurred: {err}" )
+            messagebox.showerror( "Error", f"An error occurred: {err}" )
+        return None
+
+
+if __name__ == "__main__":
+    app = LoginApp()
+    app.mainloop()

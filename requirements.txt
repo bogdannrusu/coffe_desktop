@@ -1,0 +1,7 @@
+mysql-connector-python~=8.4.0
+uvicorn~=0.30.1
+fastapi~=0.111.0
+pydantic~=2.7.4
+requests~=2.32.3
+customtkinter~=5.2.2
+pillow~=10.3.0
