@@ -18,8 +18,6 @@ class MainApp( CTk ):
         title_label = CTkLabel( master=self, text="Main Application", font=("Roboto", 24) )
         title_label.pack( pady=12, padx=10 )
 
-        # Add other widgets here
-
 
 def start_main_application():
     app = MainApp()

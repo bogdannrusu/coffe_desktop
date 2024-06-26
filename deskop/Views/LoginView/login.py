@@ -6,10 +6,11 @@ import requests
 import sys
 import os
 
-# Dynamically add the parent directory to the system path
+# Aplic directoriul unde se afla fileul main
 sys.path.append( os.path.dirname( os.path.dirname( os.path.dirname( os.path.abspath( __file__ ) ) ) ) )
-import main  # Import the main module
+import main
 
+# URL API
 BASE_URL = "http://127.0.0.1:8000"
 
 
@@ -67,8 +68,8 @@ class LoginFrame( CTkFrame ):
             response_json = response.json()
             if response.status_code == 200:
                 messagebox.showinfo( "Success", "Login successful" )
-                self.master.destroy()  # Close the login window
-                main.start_main_application()  # Start the main application
+                self.master.destroy()  # Inchide viewul de Login
+                main.start_main_application()  # Deschide View de Main
             else:
                 messagebox.showerror( "Error", response_json.get( "detail" ) )
         except requests.exceptions.HTTPError as http_err:
